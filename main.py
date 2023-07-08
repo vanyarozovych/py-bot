@@ -38,8 +38,6 @@ async def purge_error(ctx, error):
     elif isinstance(error, commands.BotMissingPermissions):
         await ctx.send('I do not have the necessary permissions to perform that task.')
 
-
-
 # Check minecraft server status
 @bot.command()
 async def serverstatus(ctx):
@@ -52,26 +50,12 @@ async def serverstatus(ctx):
         message = f"❌ - Server `{server}` is offline."
     await ctx.send(message)
 
-
-
-
-
 # Welcome message upon joining server
 @bot.event
 async def on_member_join(member):
     channel = discord.utils.get(member.guild.channels, name="general")
     if channel:
         await channel.send(f"Welcome to the server, {member.mention}")
-
-
-
-
-
-
-
-
-
-
 
 # Run bot
 bot.run(config["token"])
