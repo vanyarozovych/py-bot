@@ -1,0 +1,473 @@
+
+import discord
+from discord.ext import commands
+from discord.utils import get
+
+import asyncio 
+
+from datetime import datetime
+
+import sqlite3
+
+import io
+import requests 
+from PIL import Image, ImageFont, ImageDraw
+
+intents = discord.Intents.default()
+intents.members = True
+
+bot = commands.Bot(command_prefix="!", help_command=None, intents=discord.Intents.all())
+
+@bot.event
+async def on_ready():
+    print("Bot was connected to the server")
+
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game("help")) # Изменяем статус боту
+
+    """Статус
+    Также можно установить не только Game, но и Watching или Streaming..
+    Точные классы посмотрите в документации по discord.py
+    https://discordpy.readthedocs.io/en/latest/api.html
+    """
+
+
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+
+    msg = message.content.lower()
+    greeting_words = ["hello", "hi", "привет","хай"]
+    censored_words = ["дурак", "дура", "придурок", "лох", "ублюдок","хуесос,"," мудила","пизда", "уебан","пидарас","пиздец"]
+
+    if msg in greeting_words:
+        await message.channel.send(f"{message.author.name}, приветствую тебя!")
+
+    # Filter censored words
+    for bad_content in msg.split(" "):
+        if bad_content in censored_words:
+            await message.channel.send(f"{message.author.mention}, Будьте вежливее человечишка!")
+
+
+#на запас код приветствия
+@bot.event
+async def on_member_join(member):
+    # Получаем канал приветствия по его ID
+    channel = bot.get_channel(1117872265556676728)  # Замените ID на свой
+    role = member.guild.get_role(760998034850709535)
+    if role is not None:
+        mention = role.mention  # Получение упоминания роли
+
+    if channel is not None:
+        await channel.send(f'{member.mention}, залетел на сервер!\n {role.mention}')
+
+
+@bot.event
+async def on_member_remove(member):
+    channel = bot.get_channel(1130597461304561724)  # Замените ID на свой
+
+    if channel is not None:
+        await channel.send(f'{member.mention}, вышел с сервера!')
+
+
+@bot.command()
+async def пост_верификация(ctx):
+    # Получение объекта канала по ID
+    channel_id = 760998035018088488  # Замените на фактический ID текстового канала
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Создание embed сообщения
+        embed = discord.Embed(title="Добро пожаловать на fam!",
+                              description="Приветствую! Зайди в голосовой канал <#760998035018088489>, там тебя \nвстретит **Администрация Сервера**, и поможет тебе пройти \nверификацию. Мы все ждём тебя, удачи!",
+                              color=0x323232)
+        embed.set_image(url="https://media.giphy.com/media/c1NcxJX9Us3P9sRSHC/giphy.gif")
+
+        # Отправка embed сообщения в определенный канал
+        await target_channel.send(embed=embed)
+    else:
+        print("Канал не найден.")
+
+@bot.command()
+async def пост_навигация(ctx):
+    # Получение объекта канала по ID
+    channel_id = 900316761520500756  # Замените на фактический ID текстового канала
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Создание embed сообщения
+        embed = discord.Embed(title="Добро пожаловать на fam!",
+                              description="Приветствую! Зайди в голосовой канал <#760998035018088489>, там тебя \nвстретит **Администрация Сервера**, и поможет тебе пройти \nверификацию. Мы все ждём тебя, удачи!",
+                              color=0x323232)
+        embed.set_image(url="https://media.giphy.com/media/c1NcxJX9Us3P9sRSHC/giphy.gif")
+
+        # Отправка embed сообщения в определенный канал
+        await target_channel.send(embed=embed)
+    else:
+        print("Канал не найден.")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104), commands.has_role(1123263812884234360), commands.has_role(760998034850709540))
+async def event_among_us(ctx):
+    # Получение объекта канала по ID
+    channel_id = 1124472902515970078  # Замените на фактический ID текстового канала
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Создание embed сообщения
+        embed = discord.Embed(title="AMONG US!", description="<@&1124470731988807690> Начинается ивент по игре Among Us!\nЗаходите все в голосовой канал!", color=0x323232)
+        embed.set_image(url="https://media.tenor.com/BGQHhBwbYNwAAAAC/among-us.gif")
+
+        # Отправка embed сообщения в определенный канал
+        await target_channel.send(embed=embed)
+    else:
+        print("Канал не найден.")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104), commands.has_role(1123263812884234360), commands.has_role(760998034850709540))
+async def event_minecraft(ctx):
+    # Getting the channel object by ID
+    channel_id = 1122421410321682533  # Replace with the actual ID of the text channel
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Creating the embed message
+        embed = discord.Embed(
+            title="MINECRAFT!",
+            description="<@&1123987922308313158> Начинается ивент по игре Minecraft! \n\n- IP: vanyarozovych.aternos.me:56613\n- Version: 1.16.5 \n- Режим игры: выживание\n- Давайте развиваться вместе!\n\n- (Если вы впервые заходите на сервер, попросите одного из ивентёров добавить вас в whitelist, чтобы у вас был доступ к заходу на сервер)",
+            color=0x323232
+        )
+        embed.set_image(url="https://media.tenor.com/c8zAMfdwlDgAAAAC/dwdsd.gif")
+
+        # Sending the embed message to the specified channel
+        await target_channel.send(embed=embed)
+    else:
+        print("Канал не найден.")
+
+
+
+@bot.command()
+@commands.check_any(commands.has_role(760998034850709535))
+async def give_boy(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034845728780)  # Замените ID роли на фактический ID
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.add_roles(role)
+        await ctx.send(f"Роль {role.name} успешно добавлена участнику {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для выдачи этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при выдаче роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(760998034850709535))
+async def give_girl(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251411)  # Замените ID роли на фактический ID
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.add_roles(role)
+        await ctx.send(f"Роль {role.name} успешно добавлена участнику {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для выдачи этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при выдаче роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(760998034850709535))
+async def remove_boy(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034845728780)  # Замените ROLE_ID на фактический ID роли
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.remove_roles(role)
+        await ctx.send(f"Роль {role.name} успешно удалена у участника {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для удаления этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при удалении роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(760998034850709535))
+async def remove_girl(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251411)  # Замените ROLE_ID на фактический ID роли
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.remove_roles(role)
+        await ctx.send(f"Роль {role.name} успешно удалена у участника {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для удаления этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при удалении роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104))
+async def mute_event(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251402)  # Замените ID роли на фактический ID
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.add_roles(role)
+        await ctx.send(f"Роль {role.name} успешно добавлена участнику {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для выдачи этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при выдаче роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104))
+async def unmute_event(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251402)  # Замените ROLE_ID на фактический ID роли
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.remove_roles(role)
+        await ctx.send(f"Роль {role.name} успешно удалена у участника {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для удаления этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при удалении роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104))
+async def mute_voice(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251403)  # Замените ID роли на фактический ID
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.add_roles(role)
+        await ctx.send(f"Роль {role.name} успешно добавлена участнику {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для выдачи этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при выдаче роли: {str(e)}")
+
+@bot.command()
+@commands.check_any(commands.has_role(1123262857614721104))
+async def unmute_voice(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.guild.roles, id=760998034792251403)  # Замените ROLE_ID на фактический ID роли
+    if role is None:
+        await ctx.send("Роль не найдена.")
+        return
+
+    try:
+        await member.remove_roles(role)
+        await ctx.send(f"Роль {role.name} успешно удалена у участника {member.display_name}.")
+    except discord.Forbidden:
+        await ctx.send("У меня недостаточно прав для удаления этой роли.")
+    except Exception as e:
+        await ctx.send(f"Произошла ошибка при удалении роли: {str(e)}")
+
+
+
+@bot.command()
+async def report(ctx, member: discord.Member, *, reason):
+    # Получение объекта канала по ID
+    channel_id = 760998035018088492  # Замените на фактический ID текстового канала
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Создание embed сообщения
+        embed = discord.Embed(title="Репорт",
+                              description=f"Автор: {ctx.author.mention}\nНарушитель: {member.mention}\nПричина: {reason}",
+                              color=0xFF0000)
+
+        # Отправка embed сообщения в определенный канал
+        await target_channel.send(embed=embed)
+    else:
+        print("Канал не найден.")
+
+
+@bot.command()
+async def clear(ctx, amount: int = 10):
+    await ctx.channel.purge(limit=amount)
+    message = await ctx.send(f"Было удалено {amount} сообщений...")
+    await asyncio.sleep(15)
+    await message.delete()
+
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):
+    await ctx.message.delete(delay=1) # Если желаете удалять сообщение после отправки с задержкой
+
+    await member.send(f"Вы были кикнуты с сервера!") # Отправить личное сообщение пользователю
+    await ctx.send(f"Участник {member.mention} был кикнут с сервера!")
+    await member.kick(reason=reason)
+
+
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason=None):
+    await member.send(f"You was banned on server") # Отправить личное сообщение пользователю
+    await ctx.send(f"Member **{member.mention}** was banned on this server")
+    await member.ban(reason=reason)
+
+
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, user_id: int):
+    user = await bot.fetch_user(user_id)
+    await ctx.guild.unban(user)
+
+@bot.command()
+async def mute_user(ctx, member: discord.Member):
+    mute_role = discord.utils.get(ctx.guild.roles, name="role name")
+
+    if mute_role is not None:
+        await member.add_roles(mute_role)
+        await ctx.send(f"**{ctx.author}** выдал мут для **{member}**")
+    else:
+        await ctx.send("Мут-роль не найдена")
+
+    """Временный мут
+    Также вы можете сделать временный мут, для этого используйте модуль asyncio и метод sleep (asyncio.sleep).
+    Пусть функция принимает параметр time_mute. Поставьте условие if "h" in time_mute:
+    То есть, если вы пишите: !mute @user 1h, и в переменной time_mute находит букву "h" значит asyncio.sleep(time_mute[:1] * 3600)
+    
+    """
+
+@bot.event
+async def on_command_error(ctx, error):
+    """Работа с ошибками
+    
+    Работать с ошибками можно с двумя способами, как в видео (11 серия "Работа с ошибками")
+    или же в данной функции. Легче всего использовать второй вариант.. 
+    """
+
+    print(error)
+
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send(f"{ctx.author}, у вас недостаточно прав для выполнения данной команды!")
+    elif isinstance(error, commands.UserInputError):
+        await ctx.send(embed=discord.Embed(
+            description=f"Правильное использование команды: `{ctx.prefix}{ctx.command.name}` ({ctx.command.brief})\nExample: {ctx.prefix}{ctx.command.usage}"
+        ))
+
+
+@bot.command()
+async def help(ctx):
+    """Команда help
+    Чтобы не писать тысячу строк одинакового кода, лучше занесем название и описание команд в списки,
+    и переберм в цикле.
+    """
+
+    embed = discord.Embed(
+        title="Меню",
+        description="Здесь вы можете просмотреть доступные команды:"
+    )
+    commands_list = ["clear", "kick", "ban", "unban"]
+    descriptions_for_commands = ["Чистит чат", "Кикает участника", "Банит участника", "Разбанивает участника"]
+
+    for command_name, description_command in zip(commands_list, descriptions_for_commands):
+        embed.add_field(
+            name=command_name,
+            value=description_command,
+            inline=False # Будет выводиться в столбик, если True - в строчку
+        )
+
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def test(ctx, arg):
+    await ctx.send(arg)
+
+
+@bot.command(aliases = ['профиль', 'profile'])
+async def card_user(ctx):
+    img = Image.new('RGBA', (400, 200), '#232529')
+    url = str(ctx.author.avatar)[:-10]
+
+    response = requests.get(url, stream = True)
+    response = Image.open(io.BytesIO(response.content))
+    response = response.convert('RGBA')
+    response = response.resize((100, 100), Image.ANTIALIAS)
+
+    img.paste(response, (15, 15, 115, 115))
+
+    idraw = ImageDraw.Draw(img)
+    name = ctx.author.name
+    tag = ctx.author.discriminator
+
+    headline = ImageFont.truetype ('arial.ttf', size = 20)
+    undertext = ImageFont.truetype('arial.ttf', size = 12)
+
+    idraw.text((145,15), f'{name}#{tag}', font = headline)
+    idraw.text((145, 50), f'ID: {ctx.author.id}', font = undertext)
+
+    img.save('user_card.png')
+
+    await ctx.send(file = discord.File(fp = 'user_card.png'))
+
+
+connection = sqlite3.connect('mydatabase.db')
+cursor = connection.cursor()
+
+# Создание таблицы для хранения ролей
+cursor.execute('''CREATE TABLE IF NOT EXISTS roles
+                  (guild_id INTEGER, user_id INTEGER, role_id INTEGER)''')
+connection.commit()
+
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    if before.channel is None and after.channel is not None:
+        # Участник присоединился к голосовому каналу
+        print(f"{member.name} присоединился к голосовому каналу {after.channel.name}")
+    elif before.channel is not None and after.channel is None:
+        # Участник покинул голосовой канал
+        print(f"{member.name} покинул голосовой канал {before.channel.name}")
+
+@bot.command()
+async def minecraft_server(ctx):
+    server = 'vanyarozovych.aternos.me:56613'
+    response = requests.get(f'https://api.mcsrvstat.us/2/{server}')
+    data = response.json()
+    if data['online']:
+        message = f"✅ - Сервер `{server}` - онлайн. На сервере `{data['players']['online']}`/`{data['players']['max']}` игроков онлайн."
+    else:
+        message = f"❌ - Сервер `{server}` - оффлайн."
+    await ctx.send(message)
+
+
+@bot.command()
+async def пост_доступныероли(ctx):
+    channel_id = 900316761520500756  # Замените на фактический ID текстового канала
+    target_channel = bot.get_channel(channel_id)
+
+    if target_channel is not None:
+        # Создание embed сообщения
+        embed = discord.Embed(title="**Доступные роли**")
+        embed.add_field(description="<@&760998034845728780> гендерная роль, позволяющая пользоваться голосовыми каналами и чатами. Получить можно при прохождении адаптации сервера.", inline=False)
+        embed.add_field(description="<@&760998034792251411> гендерная роль, позволяющая пользоваться голосовыми каналами и чатами. Получить можно при прохождении адаптации сервера.", inline=False)
+        embed.add_field(description="<@&1123987922308313158> ивент-роль, позволяющая участвовать в ивенте minecraft. Получить можно при прохождении адаптации сервера.", inline=False)
+        embed.add_field(description="<@&1124470731988807690> ивент-роль, позволяющая участвовать в ивенте among-us. Получить можно при прохождении адаптации сервера.", inline=False)
+        embed.add_field(description="<@&1125317036839538760> ивент-роль, позволяющая участвовать в ивенте puzzle. Получить можно при прохождении адаптации сервера.", inline=False)
+        embed.add_field(description="<@&1121843791926657114> ивент-роль, позволяющая участвовать в ивенте puzzle. Получить можно при прохождении адаптации сервера.", inline=False)
+
+        embed.colour = discord.Color(0x323232)
+
+        # Загрузка изображения с файла на компьютере
+        with open("D:/Downloads/Telegram Desktop/ДОСТУПНЫЕ РОЛИ.png", "rb") as image_file:
+            image = discord.File(fp=image_file, filename="ДОСТУПНЫЕ РОЛИ.png")
+            embed.set_thumbnail(url="attachment://ДОСТУПНЫЕ РОЛИ.png")
+
+        await target_channel.send(embed=embed, file=image)
+    else:
+        print("Канал не найден.")
